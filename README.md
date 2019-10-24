@@ -1,4 +1,4 @@
-# white_list
+# White List
 
 White List - mobile app for veryfing VAT clients in Poland. 
 

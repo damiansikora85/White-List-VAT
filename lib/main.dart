@@ -1,4 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+import 'subject.dart';
 
 void main() => runApp(MyApp());
 
@@ -44,18 +49,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  final String _serverTest = 'https://wl-test.mf.gov.pl/';
+  final String _serverProd = 'https://wl-api.mf.gov.pl';
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+  String _foundName = "";
+  String _foundNip = "";
+  final myController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -91,21 +90,36 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+            TextField(
+              controller: myController,
+              keyboardType: TextInputType.number,
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
+            FlatButton(
+              color: Colors.blueAccent,
+              textColor: Colors.white,
+              child: Text('Sprawdź'), onPressed: () async {
+                var response = await http.get(_serverProd+'/api/search/nip/'+myController.text+'?date=2019-10-24');
+                if(response.statusCode == 200)
+                {
+                  
+                  var responseJson = json.decode(response.body);
+                  if(responseJson['result'] != null && responseJson['result']['subject'] != null)
+                  {
+                    var subject = Subject.fromJson(responseJson['result']['subject']);
+
+                    setState(() {
+                    _foundName = subject.name;
+                    _foundNip = subject.nip; 
+                    });
+                  }
+                }
+              },
             ),
+            Text(_foundName),
+            Text(_foundNip),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

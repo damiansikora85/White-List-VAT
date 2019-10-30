@@ -55,6 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String _foundName = "";
   String _foundNip = "";
   final myController = TextEditingController();
+  Subject _subject = null;
 
   @override
   Widget build(BuildContext context) {
@@ -70,10 +71,12 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
+      body: Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: 12,
+            horizontal: 12
+          ),
+          child: Column(
           // Column is also a layout widget. It takes a list of children and
           // arranges them vertically. By default, it sizes itself to fit its
           // children horizontally, and tries to be as tall as its parent.
@@ -88,38 +91,150 @@ class _MyHomePageState extends State<MyHomePage> {
           // center the children vertically; the main axis here is the vertical
           // axis because Columns are vertical (the cross axis would be
           // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            TextField(
+            Container(
+              margin: EdgeInsets.symmetric(
+              vertical: 12
+              ),
+              child: TextField(
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'NIP',
+                suffix: IconButton(
+                  icon: Icon(Icons.cancel),
+                  //onPressed: _onClear,
+                ),
+              ),
               controller: myController,
               keyboardType: TextInputType.number,
+              )
             ),
-            FlatButton(
-              color: Colors.blueAccent,
-              textColor: Colors.white,
-              child: Text('Sprawdź'), onPressed: () async {
-                var response = await http.get(_serverProd+'/api/search/nip/'+myController.text+'?date=2019-10-24');
-                if(response.statusCode == 200)
-                {
-                  
-                  var responseJson = json.decode(response.body);
-                  if(responseJson['result'] != null && responseJson['result']['subject'] != null)
+            ButtonTheme(
+              minWidth: double.infinity,
+              height: 64,
+              child:RaisedButton(
+                color: Colors.blueAccent,
+                textColor: Colors.white,
+                child: Text('Sprawdź'), onPressed: () async {
+                  FocusScope.of(context).requestFocus(new FocusNode());
+                  var response = await http.get(_serverProd+'/api/search/nip/'+myController.text+'?date=2019-10-24');
+                  if(response.statusCode == 200)
                   {
-                    var subject = Subject.fromJson(responseJson['result']['subject']);
+                    var responseJson = json.decode(response.body);
+                    if(responseJson['result'] != null && responseJson['result']['subject'] != null)
+                    {
+                      _subject = Subject.fromJson(responseJson['result']['subject']);
 
-                    setState(() {
-                    _foundName = subject.name;
-                    _foundNip = subject.nip; 
-                    });
+                      setState(() {
+                      _foundName = _subject.name;
+                      _foundNip = _subject.nip; 
+                      });
+                    }
                   }
-                }
-              },
+                },
+              ),
             ),
-            Text(_foundName),
-            Text(_foundNip),
+            Container(
+              margin: EdgeInsets.symmetric(
+              vertical: 12
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+              children: createColumn(),
+              ),
+            )
           ],
         ),
       ),
     );
+  }
+
+  List<Widget> createColumn() 
+  {
+    var fontSmall = 12.0;
+    var fontBig = 18.0;
+    var column = new List<Widget>();
+
+    if(_subject != null)
+    {
+      column.add(Text('Nazwa',
+        textAlign: TextAlign.start,
+        style: TextStyle(
+          fontSize: fontSmall,
+          ),
+        )
+      );
+
+      column.add(Text(_subject.name,
+        textAlign: TextAlign.start,
+        style: TextStyle(
+            fontSize: fontBig,
+            ),
+          )
+        );
+
+      column.add(Divider());
+
+      column.add(Text('NIP',
+        textAlign: TextAlign.start,
+        style: TextStyle(
+          fontSize: fontSmall,
+          ),
+        )
+      );
+      
+      column.add(Text(_subject.nip,
+        textAlign: TextAlign.start,
+        style: TextStyle(
+            fontSize: fontBig,
+            ),
+          )
+        );
+      column.add(Divider());
+
+      column.add(Text('Status VAT',
+        textAlign: TextAlign.start,
+        style: TextStyle(
+          fontSize: fontSmall,
+          ),
+        )
+      );
+      
+      column.add(Text(_subject.statusVat,
+        textAlign: TextAlign.start,
+        style: TextStyle(
+            fontSize: fontBig,
+            ),
+          )
+        );
+        column.add(Divider());
+
+      /*column.add(createRow('Nazwa', _subject.name));
+      column.add(createRow('NIP', _subject.nip));
+      column.add(createRow('PESEL', _subject.pesel));
+      column.add(createRow('Status VAT', _subject.statusVat));
+      column.add(createRow('Adres zamieszkania', _subject.residenceAddress));
+      column.add(createRow('Adres firmowy', _subject.workingAddress));
+      column.add(createRow('Data rozpoczęcia prowadzenia działalności', _subject.registrationLegalDate.toString()));
+      column.add(createRow('KRS', _subject.krs));*/
+
+    }
+    return column;
+  }
+
+  Row createRow(String title, String value)
+  {
+    return new Row(
+        children: <Widget>[
+          Text(title),
+          Text(
+            value.isNotEmpty ? value : 'brak',
+            textAlign: TextAlign.end,
+            overflow: TextOverflow.visible,
+          )
+        ],
+      );
   }
 }

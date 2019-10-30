@@ -1,28 +1,29 @@
 class Subject
 {
-  String name;
-  String nip;
-  String statusVat;
-  String regon;
-  String pesel;
-  String krs;
-  String residenceAddress;
-  String workingAddress;
+  String name = "";
+  String nip = "";
+  String statusVat = "";
+  String regon = "";
+  String pesel = "";
+  String krs = "";
+  String residenceAddress = "";
+  String workingAddress = "";
   //reprezentatives;
   //authorizedClerks;
   //partners;
-  DateTime registrationLegalDate;
-  DateTime registrationDenialDate;
-  String registrationDenialBasis;
-  DateTime restorationDate;
-  String restorationBasis;
-  DateTime removalDate;
-  String removalBasis;
-  List<String> accounts;
-  bool hasVirtualAccounts;
+  DateTime registrationLegalDate = DateTime.fromMicrosecondsSinceEpoch(0);
+  DateTime registrationDenialDate = DateTime.fromMicrosecondsSinceEpoch(0);
+  String registrationDenialBasis = "";
+  DateTime restorationDate = DateTime.fromMicrosecondsSinceEpoch(0);
+  String restorationBasis = "";
+  DateTime removalDate = DateTime.fromMicrosecondsSinceEpoch(0);
+  String removalBasis = "";
+  List<String> accounts = new List<String>();
+  bool hasVirtualAccounts = false;
 
   
   Subject();
+
   factory Subject.fromJson(Map<String, Object> json)
   {
     var subject = new Subject();

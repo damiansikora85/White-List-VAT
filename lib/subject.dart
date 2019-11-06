@@ -93,7 +93,7 @@ class Subject
     }
     if(json['accountNumbers'] != null)
     {
-
+      subject.accounts = (json['accountNumbers'] as List).cast<String>();
     }
 
     return subject;

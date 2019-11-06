@@ -3,6 +3,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import 'package:appcenter/appcenter.dart';
+import 'package:appcenter_analytics/appcenter_analytics.dart';
+import 'package:appcenter_crashes/appcenter_crashes.dart';
+
+import 'error.dart';
 import 'subject.dart';
 
 void main() => runApp(MyApp());
@@ -102,10 +107,6 @@ class _MyHomePageState extends State<MyHomePage> {
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'NIP',
-                suffix: IconButton(
-                  icon: Icon(Icons.cancel),
-                  //onPressed: _onClear,
-                ),
               ),
               controller: myController,
               keyboardType: TextInputType.number,
@@ -120,9 +121,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Text('Sprawdź'), onPressed: () async {
                   FocusScope.of(context).requestFocus(new FocusNode());
                   var response = await http.get(_serverProd+'/api/search/nip/'+myController.text+'?date=2019-10-24');
+                  var responseJson = json.decode(response.body);
                   if(response.statusCode == 200)
                   {
-                    var responseJson = json.decode(response.body);
                     if(responseJson['result'] != null && responseJson['result']['subject'] != null)
                     {
                       _subject = Subject.fromJson(responseJson['result']['subject']);
@@ -132,6 +133,33 @@ class _MyHomePageState extends State<MyHomePage> {
                       _foundNip = _subject.nip; 
                       });
                     }
+                  }
+                  else
+                  {
+                    var error = VatError.fromJson(responseJson);
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Wystąpił problem'),
+                          content: SingleChildScrollView(
+                            child: ListBody(
+                              children: <Widget>[
+                                Text(error.message+' ('+error.code+')'),
+                              ],
+                            ),
+                          ),
+                          actions: <Widget>[
+                            FlatButton(
+                              child: Text('Rozumiem'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        );
+                      }
+                    );
                   }
                 },
               ),
@@ -194,6 +222,38 @@ class _MyHomePageState extends State<MyHomePage> {
         );
       column.add(Divider());
 
+      column.add(Text('Numery kont',
+        textAlign: TextAlign.start,
+        style: TextStyle(
+          fontSize: fontSmall,
+          ),
+        )
+      );
+      if(_subject.accounts.length > 0)
+      {
+        for(var account in _subject.accounts)
+        {
+          column.add(Text(account,
+          textAlign: TextAlign.start,
+          style: TextStyle(
+              fontSize: fontBig,
+              ),
+            )
+          );
+        }
+      }
+      else
+      {
+        column.add(Text('Brak',
+        textAlign: TextAlign.start,
+        style: TextStyle(
+            fontSize: fontBig,
+            ),
+          )
+        );
+      }
+      column.add(Divider());
+
       column.add(Text('Status VAT',
         textAlign: TextAlign.start,
         style: TextStyle(
@@ -210,15 +270,6 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         );
         column.add(Divider());
-
-      /*column.add(createRow('Nazwa', _subject.name));
-      column.add(createRow('NIP', _subject.nip));
-      column.add(createRow('PESEL', _subject.pesel));
-      column.add(createRow('Status VAT', _subject.statusVat));
-      column.add(createRow('Adres zamieszkania', _subject.residenceAddress));
-      column.add(createRow('Adres firmowy', _subject.workingAddress));
-      column.add(createRow('Data rozpoczęcia prowadzenia działalności', _subject.registrationLegalDate.toString()));
-      column.add(createRow('KRS', _subject.krs));*/
 
     }
     return column;

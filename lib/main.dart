@@ -164,14 +164,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
               ),
             ),
-            Container(
-              margin: EdgeInsets.symmetric(
-              vertical: 12
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-              children: createColumn(),
-              ),
+            Expanded(
+              child: ListView(
+              padding: const EdgeInsets.all(8),
+              children: createList(),
+            ),
             )
           ],
         ),
@@ -179,15 +176,15 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  List<Widget> createColumn() 
+  List<Widget> createList() 
   {
     var fontSmall = 12.0;
     var fontBig = 18.0;
-    var column = new List<Widget>();
+    var elements = new List<Widget>();
 
     if(_subject != null)
     {
-      column.add(Text('Nazwa',
+      elements.add(Text('Nazwa',
         textAlign: TextAlign.start,
         style: TextStyle(
           fontSize: fontSmall,
@@ -195,7 +192,7 @@ class _MyHomePageState extends State<MyHomePage> {
         )
       );
 
-      column.add(Text(_subject.name,
+      elements.add(Text(_subject.name,
         textAlign: TextAlign.start,
         style: TextStyle(
             fontSize: fontBig,
@@ -203,9 +200,9 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         );
 
-      column.add(Divider());
+      elements.add(Divider());
 
-      column.add(Text('NIP',
+      elements.add(Text('NIP',
         textAlign: TextAlign.start,
         style: TextStyle(
           fontSize: fontSmall,
@@ -213,16 +210,16 @@ class _MyHomePageState extends State<MyHomePage> {
         )
       );
       
-      column.add(Text(_subject.nip,
+      elements.add(Text(_subject.nip,
         textAlign: TextAlign.start,
         style: TextStyle(
             fontSize: fontBig,
             ),
           )
         );
-      column.add(Divider());
+      elements.add(Divider());
 
-      column.add(Text('Numery kont',
+      elements.add(Text('Numery kont',
         textAlign: TextAlign.start,
         style: TextStyle(
           fontSize: fontSmall,
@@ -233,7 +230,7 @@ class _MyHomePageState extends State<MyHomePage> {
       {
         for(var account in _subject.accounts)
         {
-          column.add(Text(account,
+          elements.add(Text(account,
           textAlign: TextAlign.start,
           style: TextStyle(
               fontSize: fontBig,
@@ -244,7 +241,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
       else
       {
-        column.add(Text('Brak',
+        elements.add(Text('Brak',
         textAlign: TextAlign.start,
         style: TextStyle(
             fontSize: fontBig,
@@ -252,9 +249,9 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         );
       }
-      column.add(Divider());
+      elements.add(Divider());
 
-      column.add(Text('Status VAT',
+      elements.add(Text('Status VAT',
         textAlign: TextAlign.start,
         style: TextStyle(
           fontSize: fontSmall,
@@ -262,30 +259,15 @@ class _MyHomePageState extends State<MyHomePage> {
         )
       );
       
-      column.add(Text(_subject.statusVat,
+      elements.add(Text(_subject.statusVat,
         textAlign: TextAlign.start,
         style: TextStyle(
             fontSize: fontBig,
             ),
           )
         );
-        column.add(Divider());
-
+        elements.add(Divider());
     }
-    return column;
-  }
-
-  Row createRow(String title, String value)
-  {
-    return new Row(
-        children: <Widget>[
-          Text(title),
-          Text(
-            value.isNotEmpty ? value : 'brak',
-            textAlign: TextAlign.end,
-            overflow: TextOverflow.visible,
-          )
-        ],
-      );
+    return elements;
   }
 }

@@ -3,14 +3,19 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:appcenter/appcenter.dart';
-import 'package:appcenter_analytics/appcenter_analytics.dart';
-import 'package:appcenter_crashes/appcenter_crashes.dart';
+import 'package:flutter_appcenter_bundle/flutter_appcenter_bundle.dart';
 
 import 'error.dart';
 import 'subject.dart';
 
-void main() => runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await AppCenter.startAsync(
+    appSecretAndroid: '8cadde95-7763-4929-a0aa-3b324a5c32b4',
+    appSecretIOS: 'cbe808f3-a1d1-4086-a6eb-4b11ba1b25c9',
+  );
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -77,11 +82,8 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: 12,
-            horizontal: 12
-          ),
-          child: Column(
+        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+        child: Column(
           // Column is also a layout widget. It takes a list of children and
           // arranges them vertically. By default, it sizes itself to fit its
           // children horizontally, and tries to be as tall as its parent.
@@ -100,75 +102,74 @@ class _MyHomePageState extends State<MyHomePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
-              margin: EdgeInsets.symmetric(
-              vertical: 12
-              ),
-              child: TextField(
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'NIP',
-              ),
-              controller: myController,
-              keyboardType: TextInputType.number,
-              )
-            ),
+                margin: EdgeInsets.symmetric(vertical: 12),
+                child: TextField(
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'NIP',
+                  ),
+                  controller: myController,
+                  keyboardType: TextInputType.number,
+                )),
             ButtonTheme(
               minWidth: double.infinity,
               height: 64,
-              child:RaisedButton(
+              child: RaisedButton(
                 color: Colors.blueAccent,
                 textColor: Colors.white,
-                child: Text('Sprawdź'), onPressed: () async {
+                child: Text('Sprawdź'),
+                onPressed: () async {
+                  AppCenter.trackEventAsync('check');
                   FocusScope.of(context).requestFocus(new FocusNode());
-                  var response = await http.get(_serverProd+'/api/search/nip/'+myController.text+'?date=2019-10-24');
+                  var response = await http.get(_serverProd +
+                      '/api/search/nip/' +
+                      myController.text +
+                      '?date=2019-10-24');
                   var responseJson = json.decode(response.body);
-                  if(response.statusCode == 200)
-                  {
-                    if(responseJson['result'] != null && responseJson['result']['subject'] != null)
-                    {
-                      _subject = Subject.fromJson(responseJson['result']['subject']);
+                  if (response.statusCode == 200) {
+                    if (responseJson['result'] != null &&
+                        responseJson['result']['subject'] != null) {
+                      _subject =
+                          Subject.fromJson(responseJson['result']['subject']);
 
                       setState(() {
-                      _foundName = _subject.name;
-                      _foundNip = _subject.nip; 
+                        _foundName = _subject.name;
+                        _foundNip = _subject.nip;
                       });
                     }
-                  }
-                  else
-                  {
+                  } else {
                     var error = VatError.fromJson(responseJson);
                     showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text('Wystąpił problem'),
-                          content: SingleChildScrollView(
-                            child: ListBody(
-                              children: <Widget>[
-                                Text(error.message+' ('+error.code+')'),
-                              ],
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('Wystąpił problem'),
+                            content: SingleChildScrollView(
+                              child: ListBody(
+                                children: <Widget>[
+                                  Text(error.message + ' (' + error.code + ')'),
+                                ],
+                              ),
                             ),
-                          ),
-                          actions: <Widget>[
-                            FlatButton(
-                              child: Text('Rozumiem'),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
-                        );
-                      }
-                    );
+                            actions: <Widget>[
+                              FlatButton(
+                                child: Text('Rozumiem'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          );
+                        });
                   }
                 },
               ),
             ),
             Expanded(
               child: ListView(
-              padding: const EdgeInsets.all(8),
-              children: createList(),
-            ),
+                padding: const EdgeInsets.all(8),
+                children: createList(),
+              ),
             )
           ],
         ),
@@ -176,97 +177,91 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  List<Widget> createList() 
-  {
+  List<Widget> createList() {
     var fontSmall = 12.0;
     var fontBig = 18.0;
     var elements = new List<Widget>();
 
-    if(_subject != null)
-    {
-      elements.add(Text('Nazwa',
+    if (_subject != null) {
+      elements.add(Text(
+        'Nazwa',
         textAlign: TextAlign.start,
         style: TextStyle(
           fontSize: fontSmall,
-          ),
-        )
-      );
+        ),
+      ));
 
-      elements.add(Text(_subject.name,
+      elements.add(Text(
+        _subject.name,
         textAlign: TextAlign.start,
         style: TextStyle(
-            fontSize: fontBig,
-            ),
-          )
-        );
+          fontSize: fontBig,
+        ),
+      ));
 
       elements.add(Divider());
 
-      elements.add(Text('NIP',
+      elements.add(Text(
+        'NIP',
         textAlign: TextAlign.start,
         style: TextStyle(
           fontSize: fontSmall,
-          ),
-        )
-      );
-      
-      elements.add(Text(_subject.nip,
+        ),
+      ));
+
+      elements.add(Text(
+        _subject.nip,
         textAlign: TextAlign.start,
         style: TextStyle(
-            fontSize: fontBig,
-            ),
-          )
-        );
+          fontSize: fontBig,
+        ),
+      ));
       elements.add(Divider());
 
-      elements.add(Text('Numery kont',
+      elements.add(Text(
+        'Numery kont',
         textAlign: TextAlign.start,
         style: TextStyle(
           fontSize: fontSmall,
-          ),
-        )
-      );
-      if(_subject.accounts.length > 0)
-      {
-        for(var account in _subject.accounts)
-        {
-          elements.add(Text(account,
+        ),
+      ));
+      if (_subject.accounts.length > 0) {
+        for (var account in _subject.accounts) {
+          elements.add(Text(
+            account,
+            textAlign: TextAlign.start,
+            style: TextStyle(
+              fontSize: fontBig,
+            ),
+          ));
+        }
+      } else {
+        elements.add(Text(
+          'Brak',
           textAlign: TextAlign.start,
           style: TextStyle(
-              fontSize: fontBig,
-              ),
-            )
-          );
-        }
-      }
-      else
-      {
-        elements.add(Text('Brak',
-        textAlign: TextAlign.start,
-        style: TextStyle(
             fontSize: fontBig,
-            ),
-          )
-        );
+          ),
+        ));
       }
       elements.add(Divider());
 
-      elements.add(Text('Status VAT',
+      elements.add(Text(
+        'Status VAT',
         textAlign: TextAlign.start,
         style: TextStyle(
           fontSize: fontSmall,
-          ),
-        )
-      );
-      
-      elements.add(Text(_subject.statusVat,
+        ),
+      ));
+
+      elements.add(Text(
+        _subject.statusVat,
         textAlign: TextAlign.start,
         style: TextStyle(
-            fontSize: fontBig,
-            ),
-          )
-        );
-        elements.add(Divider());
+          fontSize: fontBig,
+        ),
+      ));
+      elements.add(Divider());
     }
     return elements;
   }

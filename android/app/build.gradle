@@ -49,10 +49,10 @@ android {
 
     signingConfigs {
         release {
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-            storeFile file(keystoreProperties['storeFile'])
-            storePassword keystoreProperties['storePassword']
+            storeFile rootProject.file("app/android.keystore")
+            storePassword System.getenv("APPCENTER_KEYSTORE_PASSWORD")
+            keyAlias System.getenv("APPCENTER_KEY_ALIAS")
+            keyPassword System.getenv("APPCENTER_KEY_PASSWORD")
         }
     }
 

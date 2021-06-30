@@ -1,5 +1,4 @@
-class Subject
-{
+class Subject {
   String name = "";
   String nip = "";
   String statusVat = "";
@@ -18,81 +17,64 @@ class Subject
   String restorationBasis = "";
   DateTime removalDate = DateTime.fromMicrosecondsSinceEpoch(0);
   String removalBasis = "";
-  List<String> accounts = new List<String>();
+  List<String> accounts = List<String>.empty(growable: true);
   bool hasVirtualAccounts = false;
 
-  
   Subject();
 
-  factory Subject.fromJson(Map<String, Object> json)
-  {
+  factory Subject.fromJson(Map<String, dynamic> json) {
     var subject = new Subject();
-    if(json['name'] != null)
-    {
+    if (json['name'] != null) {
       subject.name = json['name'];
     }
-    if(json['nip'] != null)
-    {
+    if (json['nip'] != null) {
       subject.nip = json['nip'];
     }
-    if(json['statusVat'] != null)
-    {
+    if (json['statusVat'] != null) {
       subject.statusVat = json['statusVat'];
     }
-    if(json['krs'] != null)
-    {
+    if (json['krs'] != null) {
       subject.krs = json['krs'];
     }
-    if(json['regon'] != null)
-    {
+    if (json['regon'] != null) {
       subject.regon = json['regon'];
     }
-    if(json['pesel'] != null)
-    {
+    if (json['pesel'] != null) {
       subject.pesel = json['pesel'];
     }
-    if(json['residenceAddress'] != null)
-    {
+    if (json['residenceAddress'] != null) {
       subject.residenceAddress = json['residenceAddress'];
     }
-    if(json['workingAddress'] != null)
-    {
+    if (json['workingAddress'] != null) {
       subject.workingAddress = json['workingAddress'];
     }
-    if(json['registrationLegalDate'] != null)
-    {
-      subject.registrationLegalDate = DateTime.parse(json['registrationLegalDate']);
+    if (json['registrationLegalDate'] != null) {
+      subject.registrationLegalDate =
+          DateTime.parse(json['registrationLegalDate']);
     }
-    if(json['registrationDenialDate'] != null)
-    {
-      subject.registrationDenialDate = DateTime.parse(json['registrationDenialDate']);
+    if (json['registrationDenialDate'] != null) {
+      subject.registrationDenialDate =
+          DateTime.parse(json['registrationDenialDate']);
     }
-    if(json['registrationDenialBasis'] != null)
-    {
+    if (json['registrationDenialBasis'] != null) {
       subject.registrationDenialBasis = json['registrationDenialBasis'];
     }
-    if(json['restorationDate'] != null)
-    {
+    if (json['restorationDate'] != null) {
       subject.restorationDate = DateTime.parse(json['restorationDate']);
     }
-    if(json['restorationBasis'] != null)
-    {
+    if (json['restorationBasis'] != null) {
       subject.restorationBasis = json['restorationBasis'];
     }
-    if(json['removalDate'] != null)
-    {
+    if (json['removalDate'] != null) {
       subject.removalDate = DateTime.parse(json['removalDate']);
     }
-    if(json['removalBasis'] != null)
-    {
+    if (json['removalBasis'] != null) {
       subject.removalBasis = json['removalBasis'];
     }
-    if(json['hasVirtualAccounts'] != null)
-    {
+    if (json['hasVirtualAccounts'] != null) {
       subject.hasVirtualAccounts = json['hasVirtualAccounts'];
     }
-    if(json['accountNumbers'] != null)
-    {
+    if (json['accountNumbers'] != null) {
       subject.accounts = (json['accountNumbers'] as List).cast<String>();
     }
 

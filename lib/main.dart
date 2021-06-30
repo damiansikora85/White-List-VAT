@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:flutter_appcenter_bundle/flutter_appcenter_bundle.dart';
+//import 'package:flutter_appcenter_bundle/flutter_appcenter_bundle.dart';
+import 'package:app_center_bundle_sdk/app_center_bundle_sdk.dart';
 
 import 'error.dart';
 import 'subject.dart';
@@ -13,7 +14,13 @@ void main() async {
   await AppCenter.startAsync(
     appSecretAndroid: '8cadde95-7763-4929-a0aa-3b324a5c32b4',
     appSecretIOS: 'cbe808f3-a1d1-4086-a6eb-4b11ba1b25c9',
+    enableAnalytics: true, // Defaults to true
+    enableCrashes: true, // Defaults to true
   );
+  //await AppCenter.startAsync(
+  //appSecretAndroid: '8cadde95-7763-4929-a0aa-3b324a5c32b4',
+  //appSecretIOS: 'cbe808f3-a1d1-4086-a6eb-4b11ba1b25c9',
+  //);
   runApp(MyApp());
 }
 
@@ -35,13 +42,13 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Biała list podatników'),
+      home: MyHomePage(title: 'Biała lista podatników'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({Key? key, required this.title}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -65,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String _foundName = "";
   String _foundNip = "";
   final myController = TextEditingController();
-  Subject _subject = null;
+  Subject? _subject;
 
   @override
   Widget build(BuildContext context) {
@@ -114,18 +121,28 @@ class _MyHomePageState extends State<MyHomePage> {
             ButtonTheme(
               minWidth: double.infinity,
               height: 64,
-              child: RaisedButton(
-                color: Colors.blueAccent,
-                textColor: Colors.white,
+              child: ElevatedButton(
+                //color: Colors.blueAccent,
+                //textColor: Colors.white,
+
+                style: ElevatedButton.styleFrom(
+                  minimumSize: Size(double.infinity, 64),
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(2)),
+                  ),
+                ),
                 child: Text('Sprawdź'),
                 onPressed: () async {
+                  //AppCenter.trackEventAsync('check');
                   AppCenter.trackEventAsync('check');
                   FocusScope.of(context).requestFocus(new FocusNode());
-                  var response = await http.get(_serverProd +
+                  var uri = Uri.parse(_serverProd +
                       '/api/search/nip/' +
                       myController.text +
                       '?date=' +
                       DateFormat("yyyy-MM-dd").format(DateTime.now()));
+                  var response = await http.get(uri);
                   var responseJson = json.decode(response.body);
                   if (response.statusCode == 200) {
                     if (responseJson['result'] != null &&
@@ -134,8 +151,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           Subject.fromJson(responseJson['result']['subject']);
 
                       setState(() {
-                        _foundName = _subject.name;
-                        _foundNip = _subject.nip;
+                        _foundName = _subject!.name;
+                        _foundNip = _subject!.nip;
                       });
                     }
                   } else {
@@ -153,7 +170,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               ),
                             ),
                             actions: <Widget>[
-                              FlatButton(
+                              TextButton(
                                 child: Text('Rozumiem'),
                                 onPressed: () {
                                   Navigator.of(context).pop();
@@ -181,7 +198,7 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Widget> createList() {
     var fontSmall = 12.0;
     var fontBig = 18.0;
-    var elements = new List<Widget>();
+    var elements = List<Widget>.empty(growable: true);
 
     if (_subject != null) {
       elements.add(Text(
@@ -193,7 +210,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ));
 
       elements.add(Text(
-        _subject.name,
+        _subject!.name,
         textAlign: TextAlign.start,
         style: TextStyle(
           fontSize: fontBig,
@@ -211,7 +228,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ));
 
       elements.add(Text(
-        _subject.nip,
+        _subject!.nip,
         textAlign: TextAlign.start,
         style: TextStyle(
           fontSize: fontBig,
@@ -226,8 +243,8 @@ class _MyHomePageState extends State<MyHomePage> {
           fontSize: fontSmall,
         ),
       ));
-      if (_subject.accounts.length > 0) {
-        for (var account in _subject.accounts) {
+      if (_subject!.accounts.length > 0) {
+        for (var account in _subject!.accounts) {
           elements.add(Text(
             account,
             textAlign: TextAlign.start,
@@ -256,7 +273,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ));
 
       elements.add(Text(
-        _subject.statusVat,
+        _subject!.statusVat,
         textAlign: TextAlign.start,
         style: TextStyle(
           fontSize: fontBig,

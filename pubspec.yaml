@@ -23,7 +23,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^0.13.3
+  http: ^0.13.6
   intl: ^0.17.0
   #app_center_bundle_sdk: ^0.0.2
 

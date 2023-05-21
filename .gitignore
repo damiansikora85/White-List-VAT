@@ -74,3 +74,4 @@
 
 key.properties
 android/keystore.jks
+pubspec.lock

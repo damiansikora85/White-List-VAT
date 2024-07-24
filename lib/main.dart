@@ -7,6 +7,8 @@ import 'subject.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:appcenter_sdk_flutter/appcenter_sdk_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,6 +68,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    //final SharedPreferences prefs = await SharedPreferences.getInstance();
+    Future.delayed(Duration.zero, () async {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      if (prefs.getBool('isFirstLaunch') == null) {
+        showAlert(context);
+        prefs.setBool('isFirstLaunch', false);
+      }
+    });
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -179,6 +189,31 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
+  }
+
+  void showAlert(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              content: Text(
+                  "Ta aplikacja korzysta z danych udostępnionych przez Ministerstwo Finansów - nie jest to aplikacja stworzona przez tą instutucję."),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('Źródło danych'),
+                  onPressed: () async {
+                    await launchUrl(Uri.parse(
+                        'https://www.gov.pl/web/kas/api-wykazu-podatnikow-vat'));
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: Text('Rozumiem'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ));
   }
 
   List<Widget> createList() {
